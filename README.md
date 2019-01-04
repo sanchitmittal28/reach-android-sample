@@ -5,7 +5,7 @@
 This repository contains the sample app and source code to demonstrate the basic use of Sixgill Reach SDK. 
 You can find the complete SDK documentation [here](https://github.com/sixgill/sense-docs/blob/master/guides/002-sdks/002-android-sdk.md)
 
-*Reach SDK version: 1.2.7*
+*Reach SDK version: 1.2.8*
 ##### [Download sample app](https://github.com/sixgill/reach-android-sample/raw/master/android-sample-build.apk)
 
 ## Implementation details
