@@ -166,7 +166,7 @@ Running Reach SDK with indoor providers require you to add `WAKE_LOCK` permissio
 <uses-permission android:name="android.permission.WAKE_LOCK" />
 ```
 Add the Indoor Atlas Maven repository in your root level gradle file
-```json
+```gradle
 maven {
     // maven repository for indoor atlas
     url "http://indooratlas-ltd.bintray.com/mvn-public"
