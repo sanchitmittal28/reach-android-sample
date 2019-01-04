@@ -159,7 +159,7 @@ Reach SDK provides support for Indoor Atlas as a provider. To use this, you need
     android:name="com.indooratlas.android.sdk.API_SECRET"
     android:value="your-api-secret-will-go-here" />
 ```
-*Note: To check the usages of Indoor Atlas in this sample app, you need to provide these values in `secrerts.xml` file which can be found under res>values folder*
+*Note: To check the usages of Indoor Atlas in this sample app, you need to provide these values in `secrets.xml` file which can be found under res>values folder*
 
 Running Reach SDK with indoor providers require you to add `WAKE_LOCK` permission
 ```xml
@@ -212,6 +212,13 @@ Implement `IndoorAtlasCallback` in your class where you want to get the data fro
 ```java
 public class ProviderDemoActivity extends AppCompatActivity implements IndoorAtlasCallback {
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_provider);
+        // enable the Reach SDK
+        Reach.enable(this);
+    }
+    @Override
     protected void onResume() {
         super.onResume();
         IndoorAtlasProvider.getInstance(this).setProviderEventCallback(this);
@@ -246,3 +253,73 @@ The `IndoorAtlasCallback` will provide you 3 methods
 - onExitFloorPlan : `onExitFloorPlan` will be fired when a user exits a floor
 
 Checkout the `ProviderDemoActivity.java` class to checkout how the floor plan image, floor data and Points are used.
+
+#### Plotting the floor map provided from Indoor Atlas
+To plot the floor image, we are using the [Subsampling Scale Image View](https://github.com/davemorrissey/subsampling-scale-image-view). A custom image view has been created on top of this library to handle the floor map plotting.
+
+We know that `onIndoorLocationChanged` provides us the Point with X and Y co-ordinate, using these values, we can draw a dot on the image
+```java
+PointF dotCenter;
+if (dotCenter != null) {
+    PointF vPoint = sourceToViewCoord(dotCenter);
+    float scaledRadius = getScale() * radius;
+    paint.setAntiAlias(true);
+    paint.setStyle(Paint.Style.FILL);
+    paint.setColor(getResources().getColor(R.color.colorPrimary));
+    if(vPoint != null) {
+        canvas.drawCircle(vPoint.x, vPoint.y, scaledRadius, paint);
+    }
+}
+```
+Now when we set the floor map image to the view, we can handle the drawing of the dot on the floor map.
+```java
+public class BlueDotView extends SubsamplingScaleImageView {
+
+    private float radius = 1.0f;
+    private PointF dotCenter = null;
+
+    Paint paint = new Paint();
+
+    public void setRadius(float radius) {
+        this.radius = radius;
+    }
+
+    public void setDotCenter(PointF dotCenter) {
+        this.dotCenter = dotCenter;
+    }
+
+    public BlueDotView(Context context) {
+        this(context, null);
+    }
+
+    public BlueDotView(Context context, AttributeSet attr) {
+        super(context, attr);
+        initialise();
+    }
+
+    private void initialise() {
+        setWillNotDraw(false);
+        setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_CENTER);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        if (!isReady()) {
+            return;
+        }
+
+        if (dotCenter != null) {
+            PointF vPoint = sourceToViewCoord(dotCenter);
+            float scaledRadius = getScale() * radius;
+            paint.setAntiAlias(true);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(getResources().getColor(R.color.colorPrimary));
+            if(vPoint != null) {
+                canvas.drawCircle(vPoint.x, vPoint.y, scaledRadius, paint);
+            }
+        }
+    }
+}
+```
